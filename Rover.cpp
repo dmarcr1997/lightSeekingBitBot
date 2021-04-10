@@ -43,10 +43,10 @@ void moveRover()
         if ((lightSensorValue1 - lightSensorValue2) < 40)
         {
             Serial.println("FRONT");
-      digitalWrite(ML_Ctrl,LOW
-      analogWrite(ML_PWM,400);
-      digitalWrite(MR_Ctrl,LOW);
-      analogWrite(MR_PWM,365);
+            digitalWrite(ML_Ctrl,LOW
+            analogWrite(ML_PWM,400);
+            digitalWrite(MR_Ctrl,LOW);
+            analogWrite(MR_PWM,365);
         }
         else if (lightSensorValue1 > 200 || lightSensorValue2 > 200)
         {

@@ -1,0 +1,22 @@
+{
+  "name": "lightseekingbitbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "NodeRover.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmarcr1997/lightSeekingBitBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dmarcr1997/lightSeekingBitBot/issues"
+  },
+  "homepage": "https://github.com/dmarcr1997/lightSeekingBitBot#readme",
+  "dependencies": {
+    "johnny-five": "^2.0.0"
+  }
+}
