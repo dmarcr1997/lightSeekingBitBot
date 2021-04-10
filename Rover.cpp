@@ -13,7 +13,6 @@ int lightInPin2 = A4;
 int lightSensorValue1 = 0;
 int lightSensorValue2 = 0;
 float tempVal;
-float humVal;
 DHT dht(DHTPIN, DHTTYPE);
 int trigPin = 5;
 int echoPin = 4;
@@ -32,6 +31,7 @@ void setup() {
 }
 
 void loop() {
+  lightValues();
   checkTemp();
   moveRover();
 }
@@ -40,12 +40,11 @@ void moveRover(){
   lightSensorValue2 = analogRead(lightInPin2);
   
   tempVal = temperature();
-  humVal = humidity();
   
   hitDistance = obstacleDist();
   Serial.println("Obstacle =");
   Serial.println(hitDistance);
-  if(humVal <=70 && tempVal <= 80 && hitDistance > 5 ){
+  if(tempVal <= 28 && hitDistance > 5 ){
     //front
     if((lightSensorValue1 - lightSensorValue2) < 40){ 
       Serial.println("FRONT");
@@ -99,13 +98,6 @@ float temperature(){
    return temp; 
 }
 
-float humidity(){
-    float humidity = dht.readHumidity();
-    Serial.println("HUM = ");
-    Serial.println(humidity);
-    return humidity;
-}
-
 void lightValues(){
   lightSensorValue1 = analogRead(lightInPin1);
   lightSensorValue2 = analogRead(lightInPin2);
@@ -117,12 +109,11 @@ void lightValues(){
 
 void checkTemp(){
   tempVal = temperature();
-  humVal = humidity();
-  if(tempVal > 100 && humVal > 70){
+  if(tempVal > 100){
     digitalWrite(tempLEDPin, 255);
-  } else if (tempVal > 70 || humVal > 50){
+  } else if (tempVal > 70){
     digitalWrite(tempLEDPin, 150);
-  } else if (tempVal > 30 ||   humVal > 30){
+  } else if (tempVal > 30){
     digitalWrite(tempLEDPin, 50); 
   } else {
     analogWrite(tempLEDPin, 0);
@@ -142,4 +133,3 @@ long obstacleDist() {
   delay(250);
   return cm;
 }
-
