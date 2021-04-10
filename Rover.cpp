@@ -26,23 +26,71 @@ void setup()
 
 void loop()
 {
+    moveRover();
 }
 
-void temperature()
+void moveRover()
 {
+    lightSensorValue1 = analogRead(lightInPin1);
+    lightSensorValue2 = analogRead(lightInPin2);
+    float tempVal = temperature();
+    float humVal = humidity();
+    //humid <= 70 temp <=50 lightSensorValue1 == lightSensorValue2 lightSensorValue1 > 100 front
+    digitalWrite(ML_Ctrl, LOW);
+    analogWrite(ML_PWM, 400);
+    digitalWrite(MR_Ctrl, LOW);
+    analogWrite(MR_PWM, 400);
+
+    //humid > 70 temp > 50 lightSensorValue1 == lightSensorValue2 back
+
+    digitalWrite(ML_Ctrl, HIGH);
+    analogWrite(ML_PWM, 400);
+    digitalWrite(MR_Ctrl, HIGH);
+    analogWrite(MR_PWM, 400);
+
+    //lightSensorValue1 < lightSensorValue2 left
+    digitalWrite(ML_Ctrl, HIGH);
+    analogWrite(ML_PWM, 400);
+    digitalWrite(MR_Ctrl, LOW);
+    analogWrite(MR_PWM, 400);
+
+    //lightSensorValue1 > lightSensorValue2 right
+    digitalWrite(ML_Ctrl, LOW);
+    analogWrite(ML_PWM, 400);
+    digitalWrite(MR_Ctrl, HIGH);
+    analogWrite(MR_PWM, 400);
+
+    //humid <= 70 temp <=50 lightSensorValue1 == lightSensorValue2 lightSensorValue1 > 300
+    analogWrite(ML_PWM, 0);
+    analogWrite(MR_PWM, 0);
+
+    delay(2000); //delay in 2s
+}
+
+float temperature()
+{
+    float temp = dht.readTemperature();
     Serial.println("Temperature = ");
-    Serial.println(dht.readTemperature());
+    Serial.println(temp);
+    return temp;
+}
+
+float humidity()
+{
+    float humidity = dht.readHumidity();
     Serial.println("Humidity = ");
-    Serial.println(dht.readHumidity());
-    delay(1000);
+    Serial.println(humidity);
+    return humidity;
 }
 
 void lightValues()
 {
     lightSensorValue1 = analogRead(lightInPin1);
     lightSensorValue2 = analogRead(lightInPin2);
+    Serial.println("Light1 = ");
     Serial.println(lightSensorValue1);
     delay(200);
+    Serial.println("Light2 = ");
     Serial.println(lightSensorValue2);
     delay(500);
 }
