@@ -9,9 +9,12 @@
  
 int lightInPin1 = A2;
 int lightInPin2 = A4;  
-
+int maxValue = 0;
 int lightSensorValue1 = 0;
 int lightSensorValue2 = 0;
+int frontVal = 0;
+int tolerance = 100;
+int sittingValue = 600;
 float tempVal;
 DHT dht(DHTPIN, DHTTYPE);
 int trigPin = 5;
@@ -38,43 +41,54 @@ void loop() {
 void moveRover(){
   lightSensorValue1 = analogRead(lightInPin1);
   lightSensorValue2 = analogRead(lightInPin2);
-  
+  frontVal = (lightSensorValue1 + lightSensorValue2) / 2;
   tempVal = temperature();
-  
+  maxValue = max(lightSensorValue1, lightSensorValue2);
+  maxValue = max(maxValue, frontVal); 
   hitDistance = obstacleDist();
   Serial.println("Obstacle =");
   Serial.println(hitDistance);
-  if(tempVal <= 28 && hitDistance > 5 ){
-    //front
-    if((lightSensorValue1 - lightSensorValue2) < 40){ 
+  
+  if(tempVal <= 28 && hitDistance > 20 ){
+    if (maxValue >= sittingValue){
+      Serial.println("STOP");
+      analogWrite(ML_PWM,0);
+      analogWrite(MR_PWM,0);
+    }
+    else if(frontVal > tolerance && frontVal == maxValue){
       Serial.println("FRONT");
       digitalWrite(ML_Ctrl,LOW);
       analogWrite(ML_PWM,400);
       digitalWrite(MR_Ctrl,LOW);
       analogWrite(MR_PWM,365);
-    }
-    else if(lightSensorValue1 > 200 || lightSensorValue2 > 200){
+      delay(1000);
       Serial.println("STOP");
       analogWrite(ML_PWM,0);
       analogWrite(MR_PWM,0);
     }
-    else if(lightSensorValue1 < lightSensorValue2 && (lightSensorValue1 - lightSensorValue2 < 100)){ 
+    else if(lightSensorValue2 > tolerance && lightSensorValue2 == maxValue){ 
       Serial.println("LEFT");
       digitalWrite(ML_Ctrl,HIGH);
       analogWrite(ML_PWM,400);
       digitalWrite(MR_Ctrl,LOW);
       analogWrite(MR_PWM,400);
+      delay(1000);
+      Serial.println("STOP");
+      analogWrite(ML_PWM,0);
+      analogWrite(MR_PWM,0);
     }
     //right
-    else if(lightSensorValue1 > lightSensorValue2 && (lightSensorValue1 - lightSensorValue2 < 100)){
-      Serial.println("RIGHTT");
+    else if(lightSensorValue1 > tolerance && lightSensorValue1 == maxValue){
+      Serial.println("RIGHT");
       digitalWrite(ML_Ctrl,LOW);
       analogWrite(ML_PWM,400);
       digitalWrite(MR_Ctrl,HIGH);
       analogWrite(MR_PWM,400);
-    }
-    //stop
-    else {
+      delay(1000);
+      Serial.println("STOP");
+      analogWrite(ML_PWM,0);
+      analogWrite(MR_PWM,0);
+    } else { 
       Serial.println("STOP");
       analogWrite(ML_PWM,0);
       analogWrite(MR_PWM,0);
@@ -86,10 +100,18 @@ void moveRover(){
     analogWrite(ML_PWM,400); 
     digitalWrite(MR_Ctrl,HIGH);
     analogWrite(MR_PWM,400);
-  }
-   //left
+
+    Serial.println("STOP");
+    analogWrite(ML_PWM,0);
+    analogWrite(MR_PWM,0);
+
+    tempVal = temperature();
   
-  delay(2000);//delay in 2s
+    hitDistance = obstacleDist();
+  }
+   
+  
+  delay(1000);//delay in 2s
 }
 float temperature(){
    float temp = dht.readTemperature();
@@ -101,23 +123,23 @@ float temperature(){
 void lightValues(){
   lightSensorValue1 = analogRead(lightInPin1);
   lightSensorValue2 = analogRead(lightInPin2);
-  Serial.println("Light1 = ");
-  Serial.println(lightSensorValue1);  
-  Serial.println("Light2 = ");
-  Serial.println(lightSensorValue2);
+//  Serial.println("Light1 = ");
+//  Serial.println(lightSensorValue1);  
+//  Serial.println("Light2 = ");
+//  Serial.println(lightSensorValue2);
 }
 
 void checkTemp(){
   tempVal = temperature();
-  if(tempVal > 100){
-    digitalWrite(tempLEDPin, 255);
-  } else if (tempVal > 70){
-    digitalWrite(tempLEDPin, 150);
-  } else if (tempVal > 30){
-    digitalWrite(tempLEDPin, 50); 
-  } else {
-    analogWrite(tempLEDPin, 0);
-  }
+  digitalWrite(tempLEDPin, HIGH);
+  if(tempVal > 30){
+    delay(10);
+  } else if (tempVal > 25){
+    delay(200);
+  } else if (tempVal > 10){
+    delay(500); 
+  } 
+  digitalWrite(tempLEDPin, 0);
 }
 long obstacleDist() {
   digitalWrite(trigPin, LOW);
@@ -127,9 +149,8 @@ long obstacleDist() {
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   cm = (duration/2) / 29.1;
-  Serial.print(cm);
-  Serial.print("cm");
-  Serial.println();
-  delay(250);
+//  Serial.print(cm);
+//  Serial.print("cm");
+//  Serial.println();
   return cm;
 }
