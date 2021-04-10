@@ -15,12 +15,18 @@ int lightSensorValue2 = 0;
 float tempVal;
 float humVal;
 DHT dht(DHTPIN, DHTTYPE);
+int trigPin = 5;
+int echoPin = 4;
+long duration, cm;
+long hitDistance;
 void setup() {
   // put your setup code here, to run once:
   pinMode(ML_Ctrl, OUTPUT);
   pinMode(ML_PWM, OUTPUT);
   pinMode(MR_Ctrl, OUTPUT);
   pinMode(MR_PWM, OUTPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
   dht.begin();
   Serial.begin(9600);
 }
@@ -28,7 +34,6 @@ void setup() {
 void loop() {
   checkTemp();
   moveRover();
-
 }
 void moveRover(){
   lightSensorValue1 = analogRead(lightInPin1);
@@ -36,8 +41,12 @@ void moveRover(){
   
   tempVal = temperature();
   humVal = humidity();
-
-  if(humVal <=70 && tempVal <= 80){
+  
+  hitDistance = obstacleDist();
+  Serial.println("Obstacle =");
+  Serial.println(hitDistance);
+  if(humVal <=70 && tempVal <= 80 && hitDistance > 5 ){
+    //front
     if((lightSensorValue1 - lightSensorValue2) < 40){ 
       Serial.println("FRONT");
       digitalWrite(ML_Ctrl,LOW);
@@ -47,7 +56,7 @@ void moveRover(){
     }
     else if(lightSensorValue1 > 200 || lightSensorValue2 > 200){
       Serial.println("STOP");
-      analogWrite(ML_PWM,0);0
+      analogWrite(ML_PWM,0);
       analogWrite(MR_PWM,0);
     }
     else if(lightSensorValue1 < lightSensorValue2 && (lightSensorValue1 - lightSensorValue2 < 100)){ 
@@ -57,14 +66,15 @@ void moveRover(){
       digitalWrite(MR_Ctrl,LOW);
       analogWrite(MR_PWM,400);
     }
+    //right
     else if(lightSensorValue1 > lightSensorValue2 && (lightSensorValue1 - lightSensorValue2 < 100)){
-      Serial.println("RIGHT");
+      Serial.println("RIGHTT");
       digitalWrite(ML_Ctrl,LOW);
       analogWrite(ML_PWM,400);
       digitalWrite(MR_Ctrl,HIGH);
       analogWrite(MR_PWM,400);
     }
-    
+    //stop
     else {
       Serial.println("STOP");
       analogWrite(ML_PWM,0);
@@ -78,6 +88,7 @@ void moveRover(){
     digitalWrite(MR_Ctrl,HIGH);
     analogWrite(MR_PWM,400);
   }
+   //left
   
   delay(2000);//delay in 2s
 }
@@ -117,3 +128,18 @@ void checkTemp(){
     analogWrite(tempLEDPin, 0);
   }
 }
+long obstacleDist() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  cm = (duration/2) / 29.1;
+  Serial.print(cm);
+  Serial.print("cm");
+  Serial.println();
+  delay(250);
+  return cm;
+}
+
