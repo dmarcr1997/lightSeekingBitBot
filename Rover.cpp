@@ -59,6 +59,7 @@ void moveRover()
             Serial.println("STOP");
             analogWrite(ML_PWM, 0);
             analogWrite(MR_PWM, 0);
+            delay(1000);
         }
         else if (frontVal > tolerance && frontVal == maxValue)
         {
@@ -111,7 +112,7 @@ void moveRover()
         analogWrite(ML_PWM, 400);
         digitalWrite(MR_Ctrl, HIGH);
         analogWrite(MR_PWM, 400);
-
+        delay(1000);
         Serial.println("STOP");
         analogWrite(ML_PWM, 0);
         analogWrite(MR_PWM, 0);
